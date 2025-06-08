@@ -12,7 +12,11 @@ file_names = ['stay-relevant/data/gdp_vals.csv', 'stay-relevant/data/inflation_v
 years = []
 values_in_file= []
 values_to_use = []
-avg_vals = {}
+
+first_quarter = {}
+second_quarter = {}
+third_quarter = {}
+fourth_quarter = {}
 
 sum = 0
 counter = 0
@@ -50,22 +54,55 @@ def clean_files(file_name, listofCols):
             values_to_use.append(j)
     
 
-clean_files('stay-relevant/data/gdp_vals.csv', ['observation_date', 'GDP'])
 
-for i in range(len(years)):
-    first_index = i-2
-    second_index = i-5
-    if years[first_index] == years[second_index]:
-        for i in range(len(values_to_use)):
-            if i % 4 == 0:
-                avg_vals[years[i]] = (sum)
-                sum = 0
-            sum = round((sum + values_to_use[i]), 2)
-
-for i in range(len(years)):
-    y_vals = avg_vals.values()
-    x_vals = avg_vals.keys()
-    plota.plot(x_vals, y_vals)
     
-plota.show()
+
+def organize_and_graph():
+    smth = 0
+    num = 2000
+    while smth <= 100:
+        #print(num, values_to_use[smth])
+        first_quarter[num] = values_to_use[smth]
+        smth += 4
+        num +=1
+    
+    smth = 1
+    num = 2000
+    while smth <= 100:
+        #print(num, values_to_use[smth])
+        second_quarter[num] = values_to_use[smth]
+        smth += 4
+        num +=1
+    
+    smth = 2
+    num = 2000
+    while smth <= 100:
+        #print(num, values_to_use[smth])
+        third_quarter[num] = values_to_use[smth]
+        smth += 4
+        num +=1
+    
+    smth = 3
+    num = 2000
+    while smth <= 100:
+        #print(num, values_to_use[smth])
+        fourth_quarter[num] = values_to_use[smth]
+        smth += 4
+        num +=1
+    
+    
+    for i in range(len(first_quarter)):
+        plota.plot(first_quarter.keys(), first_quarter.values())
+        plota.plot(second_quarter.keys(), second_quarter.values())
+        plota.plot(third_quarter.keys(), third_quarter.values())
+        plota.plot(fourth_quarter.keys(), fourth_quarter.values())
+
+    plota.show()
+    
+
+clean_files('stay-relevant/data/gdp_vals.csv', ['observation_date', 'GDP'])
+organize_and_graph()
+
+
+
 
