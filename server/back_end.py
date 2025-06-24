@@ -13,10 +13,8 @@ years = []
 values_in_file= []
 values_to_use = []
 
-first_quarter = {}
-second_quarter = {}
-third_quarter = {}
-fourth_quarter = {}
+stuff = {}
+
 
 sum = 0
 counter = 0
@@ -34,75 +32,3 @@ def send_files():
     global urls, file_names
     for i in range(len(urls)):
         download_files(urls[i], file_names[i])
-
-
-def clean_files(file_name, listofCols):
-    file_values = pd.read_csv(file_name, header=0)
-    for col in listofCols:
-        if col == 'observation_date':
-            for i in file_values[col]:
-                x = i.split('-')
-                years.append(x[0])
-        else:
-            file_values[col] = file_values[col].replace(',','')
-            file_values =  file_values.dropna()
-            file_values[col] = pd.to_numeric(file_values[col], errors='coerce')
-            values_in_file.append(file_values[col])
-    
-    for i in values_in_file:
-        for j in i:
-            values_to_use.append(j)
-    
-
-
-    
-
-def organize_and_graph():
-    smth = 0
-    num = 2000
-    while smth <= 100:
-        #print(num, values_to_use[smth])
-        first_quarter[num] = values_to_use[smth]
-        smth += 4
-        num +=1
-    
-    smth = 1
-    num = 2000
-    while smth <= 100:
-        #print(num, values_to_use[smth])
-        second_quarter[num] = values_to_use[smth]
-        smth += 4
-        num +=1
-    
-    smth = 2
-    num = 2000
-    while smth <= 100:
-        #print(num, values_to_use[smth])
-        third_quarter[num] = values_to_use[smth]
-        smth += 4
-        num +=1
-    
-    smth = 3
-    num = 2000
-    while smth <= 100:
-        #print(num, values_to_use[smth])
-        fourth_quarter[num] = values_to_use[smth]
-        smth += 4
-        num +=1
-    
-    
-    for i in range(len(first_quarter)):
-        plota.plot(first_quarter.keys(), first_quarter.values())
-        plota.plot(second_quarter.keys(), second_quarter.values())
-        plota.plot(third_quarter.keys(), third_quarter.values())
-        plota.plot(fourth_quarter.keys(), fourth_quarter.values())
-
-    plota.show()
-    
-
-clean_files('stay-relevant/data/gdp_vals.csv', ['observation_date', 'GDP'])
-organize_and_graph()
-
-
-
-
