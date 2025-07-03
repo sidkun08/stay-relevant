@@ -55,8 +55,6 @@ def change_file_data(file_name):
     
     new_dataFrame = pd.DataFrame({'years': years, 'values': true_vals})
     new_dataFrame.to_csv(file_name, index=False)
-    
-    
 
 def graph(file_name):
     df = pd.read_csv(file_name, header=0)
@@ -66,6 +64,8 @@ def graph(file_name):
     plota.scatter(x_var, y_var)
     plota.show()
 
+def linear_regress(file_name):
+    return None
 def send_files():
     global urls, file_names
     for i in range(len(urls)):
