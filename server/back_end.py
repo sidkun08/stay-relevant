@@ -23,11 +23,125 @@ def download_files(file_url, file_path):
         print('Trash')
 
 def change_file_data(file_name):
+    cummalitive_yrs = []
+    unique_yrs = []
+    unique_vals = []
+    all_vals = []
     df = pd.read_csv(file_name, header=0)
+    for col in df:
+        if 'observation_date' in col:
+            for i in df[col]:
+                date = i
+                year = date.split('-')[0]
+                cummalitive_yrs.append(year)
+        else:
+            for i in df:
+                for j in df[col]:
+                    all_vals.append(j)
+    num = 0
+    if 'daily' in file_name:
+        for i in cummalitive_yrs:
+            if num % 365 == 0:
+                unique_yrs.append(i)
+                num +=1
+        
+        num = 0
+        sum = 0
+
+        for i in all_vals:
+            sum += i
+            if num % 365 == 0 and num != 0:
+                unique_vals.append(sum/365)
+                sum = 0
+
+    elif 'monthly' in file_name:
+        for i in cummalitive_yrs:
+            if num % 12 == 0:
+                unique_yrs.append(i)
+            if i == 2025:
+                unique_yrs.append(2025)
+                break
+            num += 1
+        
+        num = 0
+        sum = 0
+        while num < (len(unique_yrs)*12):
+            sum += all_vals[num]
+            num += 1
+            if num % 12 == 0 and num != 0:
+                unique_vals.append(round(((sum/12)), 4))
+                sum = 0
+        count = 0
+        for i in cummalitive_yrs:
+            if 2025 == i:
+                count += 1
+        
+        if 2025 in unique_yrs:
+            num = -1
+            sum = 0
+            while num >= count:
+                if num == count:
+                    unique_vals.append((sum)/6)
+                    break
+                val = all_vals[num]
+                sum += val
+                num -= 1
+
+        print(len(unique_vals))
+        print(len(unique_yrs))
+
+        updated_df = pd.DataFrame({'YEARS': unique_yrs, 'VALUES': unique_vals})
+        updated_df.to_csv(file_name, index=False)
+
+    elif 'quarterly' in file_name:
+        num = 0
+        for i in cummalitive_yrs:
+            if num % 4 == 0:
+                unique_yrs.append(i)
+            num += 1
+        print(unique_yrs)
+
+        num = 0
+        sum = 0
+        while num < (len(unique_yrs)*4):
+            if num % 4 == 0 and num != 0:
+                unique_vals.append(round(((sum/4)), 4))
+                sum = 0
+            sum += all_vals[num]
+            num += 1
+            
+        if '2025' in unique_yrs:
+            num = -1
+            val= all_vals[num]
+            unique_vals.append((val))
+            
+            
+
+        print(len(unique_vals))
+        print(len(unique_yrs))
+
+        updated_df = pd.DataFrame({'YEARS': unique_yrs, 'VALUES': unique_vals})
+        updated_df.to_csv(file_name, index=False)
+    elif 'annually' in file_name:
+        for i in cummalitive_yrs:
+            unique_yrs.append(i)
+
+        num = 0
+
+        while num < len(unique_yrs):
+            unique_vals.append(all_vals[num])
+            num += 1
+        
+        print(len(unique_yrs))
+        print(len(unique_vals))
+        updated_df = pd.DataFrame({'YEARS': unique_yrs, 'VALUES': unique_vals})
+        updated_df.to_csv(file_name, index=False)
+    
+    
 def graph(file_name):
     df = pd.read_csv(file_name, header=0)
-    x_var = df['years']
-    y_var = df['values']
+    x_var = df['YEARS']
+    y_var = df['VALUES']
 
     plota.scatter(x_var, y_var)
     plota.show()
@@ -38,8 +152,7 @@ def send_files():
     global urls, file_names
     for i in range(len(urls)):
           download_files(urls[i], file_names[i])
-        # change_file_data(file_name=file_names[i])
-        # graph(file_name=file_names[i])
-
+          change_file_data(file_name=file_names[i])
+          graph(file_name=file_names[i])
 send_files()
 
