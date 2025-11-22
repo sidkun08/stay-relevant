@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import numpy
-from model_arch import PolyRegress
+from model_arch import PolyRegress, transformToTensor, polynomial_func, normalize
 
 urls = ['https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=CPIAUCSL&scale=left&cosd=1947-01-01&coed=2025-06-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1947-01-01',
         'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=PCE&scale=left&cosd=1959-01-01&coed=2025-05-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1959-01-01',
@@ -92,9 +92,6 @@ def change_file_data(file_name):
             idx -= 1
         unique_vals.append(round((sum/abs(count)), 4))
 
-        print(len(unique_yrs))
-        print(len(unique_vals))
-
         updated_df = pd.DataFrame({'YEARS': unique_yrs, 'VALUES': unique_vals})
         updated_df.to_csv(file_name, index=False)
 
@@ -104,7 +101,6 @@ def change_file_data(file_name):
             if num % 4 == 0:
                 unique_yrs.append(i)
             num += 1
-        print(unique_yrs)
 
         num = 0
         sum = 0
@@ -119,11 +115,6 @@ def change_file_data(file_name):
             num = -1
             val= all_vals[num]
             unique_vals.append((val))
-            
-            
-
-        print(len(unique_vals))
-        print(len(unique_yrs))
 
         updated_df = pd.DataFrame({'YEARS': unique_yrs, 'VALUES': unique_vals})
         updated_df.to_csv(file_name, index=False)
@@ -136,7 +127,6 @@ def change_file_data(file_name):
         while num < len(unique_yrs):
             unique_vals.append(all_vals[num])
             num += 1
-        
         
         updated_df = pd.DataFrame({'YEARS': unique_yrs, 'VALUES': unique_vals})
         updated_df.to_csv(file_name, index=False)
@@ -152,80 +142,75 @@ def graph(file_name):
     
 def instantiate_model(file_name):
     df = pd.read_csv(file_name, header=0)
-    x = torch.tensor(df['YEARS'].values, dtype=torch.float32).unsqueeze(1)
-    x_mean = x.mean()
-    x_std = x.std()
-    x = (x-x_mean) / x_std
-    y = torch.tensor(df['VALUES'].values, dtype=torch.float32).unsqueeze(1)
-    y_mean = y.mean()
-    y_std = y.std()
-    y = (y-y_mean)/y_std
+    x_train_data = []
+    x_test_data = []
+    y_train_data = []
+    y_test_data = []
+    lengthOftrain = len(df['YEARS'])
+    lengthOftrain= round((lengthOftrain/2), 0)
+    for i in df['YEARS']:
+        vals = df['VALUES']
+        x_train_data.append(i)
+        if len(x_train_data) > lengthOftrain:
+            y_test_data.append(i)
+    for j in df['VALUES']:
+        y_train_data.append(j)
+        if len(y_train_data) > lengthOftrain:
+            y_test_data.append(j)
+    print(y_train_data)
+
+    x_train = transformToTensor(x_train_data)
+    y_train = transformToTensor(y_train_data)
+
+    x_test = transformToTensor(x_test_data)
+    y_test = transformToTensor(y_test_data)
     
     
     degree = 5
-    X_poly = torch.cat([x ** i for i in range(1, degree + 1)], dim=1)
+    X_Train_Func = polynomial_func(x_train, degree)
 
     model = PolyRegress(degree)
     cost = nn.MSELoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
 
-    epochs = 10000
+    epochs = 20000
     for epoch in range(epochs):
         model.train()
-        y_pred = model(X_poly)
-        loss = cost(y_pred, y)
+        y_pred = model(X_Train_Func)
+        loss = cost(y_pred, y_train)
         
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        # if epoch % 100 == 0:
-            # print(f"Epoch {epoch}: Loss = {loss.item():.4f} ")
+        y_pred = normalize(y_pred)
+
+        if epoch % 100 == 0:
+            print(f"Epoch {epoch}: Loss = {loss.item():.4f} ")
+    
+    for i in range(len(y_pred)):
+        tensorVal = y_pred[i]
+        tensorVal = tensorVal.item()
+        print(tensorVal)
     
     model.eval()
     with torch.no_grad():
-        y_pred = model(X_poly)
-    
-    prediction = []
-    arr = y_pred.numpy()
-    for i in arr:
-        for j in i:
-            j = (j * y_std)+y_mean
-            prediction.append(j)
-    
-    x_arr = x.numpy()
-    x_vals = []
-    for i in x_arr:
-        for j in i:
-            j = (j * x_std) + x_mean
-            x_vals.append(j)
-            
+        X_Test_Func = polynomial_func(x_test, degree)
+        y_test_pred = model(X_Test_Func)
+        loss = cost(y_test_pred, y_test)
 
-    
-    # for i in prediction:
-        # print(i)
-    
-    print(file_name)
-    for i in x_arr:
-        print(i)        
-
-    x = (x*x_std) + x_mean
-    y = (y*y_std) + y_mean
-    
-    plota.scatter(x.numpy(), y.numpy(), label='Original')
-    plota.plot(x.numpy(), prediction, color='red', label='Prediction')
-    
-    
-    plota.show()
-
+    for i in range(len(y_test_pred)):
+        tensorVal = y_test_pred[i]
+        tensorVal = tensorVal.item()
+        print(tensorVal)
 
 def file_manipulation():
     global urls, file_names
-    for i in range(len(urls)):
-        download_files(urls[i], file_names[i])
-        change_file_data(file_name=file_names[i])
+    # for i in range(len(file_names)):
+        # download_files(urls[i], file_names[i])
+        # change_file_data(file_name=file_names[i])
         # graph(file_name=file_names[i])
-        instantiate_model(file_names[i])
+    instantiate_model(file_names[0])
 
 file_manipulation()
 
