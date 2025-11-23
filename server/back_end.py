@@ -147,18 +147,30 @@ def instantiate_model(file_name):
     y_train_data = []
     y_test_data = []
     lengthOftrain = len(df['YEARS'])
-    lengthOftrain= round((lengthOftrain/2), 0)
+    lengthOftrain = lengthOftrain/2
+    lengthOftrain= round((lengthOftrain))
+    lengthOftrain = int(lengthOftrain)
     for i in df['YEARS']:
         vals = df['VALUES']
         x_train_data.append(i)
         if len(x_train_data) > lengthOftrain:
-            y_test_data.append(i)
+            x_test_data.append(i)
     for j in df['VALUES']:
         y_train_data.append(j)
-        if len(y_train_data) > lengthOftrain:
+        if len(y_train_data) == lengthOftrain:
+            max = y_train_data[lengthOftrain-1]
+            max = y_train_data.index(max)
+            break
+    get_indexList = []
+    for j in df['VALUES']:
+        get_indexList.append(j)
+        if get_indexList.index(j) >= max:
             y_test_data.append(j)
-    print(y_train_data)
-
+    print(lengthOftrain)
+    print(max)
+    print(len(y_train_data))
+    print(len(y_test_data))
+    '''
     x_train = transformToTensor(x_train_data)
     y_train = transformToTensor(y_train_data)
 
@@ -183,8 +195,6 @@ def instantiate_model(file_name):
         loss.backward()
         optimizer.step()
 
-        y_pred = normalize(y_pred)
-
         if epoch % 100 == 0:
             print(f"Epoch {epoch}: Loss = {loss.item():.4f} ")
     
@@ -192,7 +202,6 @@ def instantiate_model(file_name):
         tensorVal = y_pred[i]
         tensorVal = tensorVal.item()
         print(tensorVal)
-    
     model.eval()
     with torch.no_grad():
         X_Test_Func = polynomial_func(x_test, degree)
@@ -203,14 +212,14 @@ def instantiate_model(file_name):
         tensorVal = y_test_pred[i]
         tensorVal = tensorVal.item()
         print(tensorVal)
-
+'''
 def file_manipulation():
     global urls, file_names
     # for i in range(len(file_names)):
         # download_files(urls[i], file_names[i])
         # change_file_data(file_name=file_names[i])
         # graph(file_name=file_names[i])
-    instantiate_model(file_names[0])
+    instantiate_model(file_names[4])
 
 file_manipulation()
 
