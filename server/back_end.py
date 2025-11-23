@@ -148,10 +148,14 @@ def instantiate_model(file_name):
     y_train_data = []
     y_test_data = []
     get_indexList = []
+
+    num1 = 0.85
+
     lengthOftrain = len(df['YEARS'])
-    lengthOftrain = lengthOftrain/2
+    lengthOftrain = lengthOftrain*num1
     lengthOftrain= round((lengthOftrain))
     lengthOftrain = int(lengthOftrain)
+
 
     for i in df['YEARS']:
         x_train_data.append(i)
@@ -192,9 +196,9 @@ def instantiate_model(file_name):
 
     model = PolyRegress(degree)
     cost = nn.MSELoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
-    epochs = 20000
+    epochs = 10000
     for epoch in range(epochs):
         model.train()
         y_pred = model(X_Train_Func)
@@ -206,7 +210,7 @@ def instantiate_model(file_name):
 
         if epoch % 100 == 0:
             print(f"Epoch {epoch}: Loss = {loss.item():.4f} ")
-    print("Training Prediction Data:\n")
+    print(f"Training Prediction Data:\nAccuracy: {loss}")
     y_pred = normalize(y_pred, y_train_data)
     for i in range(len(y_pred)):
         tensorVal = y_pred[i]
@@ -228,11 +232,11 @@ def instantiate_model(file_name):
 
 def file_manipulation():
     global urls, file_names
-    # for i in range(len(file_names)):
+    for i in range(len(file_names)):
         # download_files(urls[i], file_names[i])
         # change_file_data(file_name=file_names[i])
-        # graph(file_name=file_names[i])
-    instantiate_model(file_names[2])
+        graph(file_name=file_names[i])
+        instantiate_model(file_names[i])
 
 file_manipulation()
 
