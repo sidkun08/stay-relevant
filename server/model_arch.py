@@ -17,10 +17,12 @@ def transformToTensor(data):
     useData = (useData - useDataMean)/useDataStd
     return useData
 
-def normalize(pred):
-    useData = pred
-    useData = (useData*useDataStd) + useDataMean
-    return useData
+def normalize(pred, data):
+    data = torch.tensor(data, dtype=torch.float32).unsqueeze(1)
+    mean = data.mean()
+    std = data.std()
+    pred = (pred*std) + mean
+    return pred
     
 def polynomial_func(x, degree):
     X_poly = torch.cat([x ** i for i in range(1, degree + 1)], dim=1)

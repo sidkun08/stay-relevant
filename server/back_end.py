@@ -138,6 +138,7 @@ def graph(file_name):
     y_var = df['VALUES']
 
     plota.scatter(x_var, y_var)
+    plota.title(label=file_name)
     plota.show()
     
 def instantiate_model(file_name):
@@ -146,14 +147,21 @@ def instantiate_model(file_name):
     x_test_data = []
     y_train_data = []
     y_test_data = []
+    get_indexList = []
     lengthOftrain = len(df['YEARS'])
     lengthOftrain = lengthOftrain/2
     lengthOftrain= round((lengthOftrain))
     lengthOftrain = int(lengthOftrain)
+
     for i in df['YEARS']:
-        vals = df['VALUES']
         x_train_data.append(i)
-        if len(x_train_data) > lengthOftrain:
+        if len(x_train_data) == lengthOftrain:
+            max = x_train_data[lengthOftrain-1]
+            max = x_train_data.index(max)
+            break
+    for i in df['YEARS']:
+        get_indexList.append(i)
+        if get_indexList.index(i) >= max:
             x_test_data.append(i)
     for j in df['VALUES']:
         y_train_data.append(j)
@@ -164,13 +172,14 @@ def instantiate_model(file_name):
     get_indexList = []
     for j in df['VALUES']:
         get_indexList.append(j)
-        if get_indexList.index(j) >= max:
-            y_test_data.append(j)
-    print(lengthOftrain)
-    print(max)
-    print(len(y_train_data))
-    print(len(y_test_data))
-    '''
+    for i in get_indexList:
+        val = get_indexList.index(i)
+        if val >= max:
+            y_test_data.append(i)
+    
+    print(x_train_data)
+    print(x_test_data)
+    
     x_train = transformToTensor(x_train_data)
     y_train = transformToTensor(y_train_data)
 
@@ -190,36 +199,40 @@ def instantiate_model(file_name):
         model.train()
         y_pred = model(X_Train_Func)
         loss = cost(y_pred, y_train)
-        
+
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         if epoch % 100 == 0:
             print(f"Epoch {epoch}: Loss = {loss.item():.4f} ")
-    
+    print("Training Prediction Data:\n")
+    y_pred = normalize(y_pred, y_train_data)
     for i in range(len(y_pred)):
         tensorVal = y_pred[i]
         tensorVal = tensorVal.item()
         print(tensorVal)
+    
     model.eval()
     with torch.no_grad():
         X_Test_Func = polynomial_func(x_test, degree)
         y_test_pred = model(X_Test_Func)
         loss = cost(y_test_pred, y_test)
 
+    y_test_pred = normalize(y_test_pred, y_test_data)
+    print("Testing Prediction Data:\n")
     for i in range(len(y_test_pred)):
         tensorVal = y_test_pred[i]
         tensorVal = tensorVal.item()
         print(tensorVal)
-'''
+
 def file_manipulation():
     global urls, file_names
     # for i in range(len(file_names)):
         # download_files(urls[i], file_names[i])
         # change_file_data(file_name=file_names[i])
         # graph(file_name=file_names[i])
-    instantiate_model(file_names[4])
+    instantiate_model(file_names[2])
 
 file_manipulation()
 
