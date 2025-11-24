@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import numpy
-from model_arch import PolyRegress, transformToTensor, polynomial_func, normalize
+from model_arch import PolyRegress, transformToTensor, polynomial_func, normalize, getMean, getStd
 
 urls = ['https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=CPIAUCSL&scale=left&cosd=1947-01-01&coed=2025-06-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1947-01-01',
         'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=PCE&scale=left&cosd=1959-01-01&coed=2025-05-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1959-01-01',
@@ -147,7 +147,7 @@ def instantiate_model(file_name):
     x_test_data = []
     y_train_data = []
     y_test_data = []
-    get_indexList = []
+    getAccurate = []
 
     num1 = 0.85
 
@@ -160,25 +160,26 @@ def instantiate_model(file_name):
     for i in df['YEARS']:
         x_train_data.append(i)
         if len(x_train_data) == lengthOftrain:
-            max = x_train_data[lengthOftrain-1]
-            max = x_train_data.index(max)
+            true_max = x_train_data[lengthOftrain-1]
+            true_max = x_train_data.index(true_max)
             break
+    get_indexList = []
     for i in df['YEARS']:
         get_indexList.append(i)
-        if get_indexList.index(i) >= max:
+        if get_indexList.index(i) >= true_max:
             x_test_data.append(i)
     for j in df['VALUES']:
         y_train_data.append(j)
         if len(y_train_data) == lengthOftrain:
-            max = y_train_data[lengthOftrain-1]
-            max = y_train_data.index(max)
+            true_max = y_train_data[lengthOftrain-1]
+            true_max = y_train_data.index(true_max)
             break
     get_indexList = []
     for j in df['VALUES']:
         get_indexList.append(j)
     for i in get_indexList:
         val = get_indexList.index(i)
-        if val >= max:
+        if val >= true_max:
             y_test_data.append(i)
     
     print(x_train_data)
@@ -198,7 +199,7 @@ def instantiate_model(file_name):
     cost = nn.MSELoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
-    epochs = 10000
+    epochs = 20000
     for epoch in range(epochs):
         model.train()
         y_pred = model(X_Train_Func)
@@ -228,13 +229,25 @@ def instantiate_model(file_name):
     for i in range(len(y_test_pred)):
         tensorVal = y_test_pred[i]
         tensorVal = tensorVal.item()
+        getAccurate.append(tensorVal)
         print(tensorVal)
+    with torch.no_grad():
+        input = 2026
+        data = [input]
+        custom_tensor = torch.tensor(data, dtype=torch.float32).unsqueeze(1)
+        _mean = getMean(x_test_data)
+        _std = getStd(x_test_data)
+        stan = (custom_tensor - _mean) / _std
+        func = polynomial_func(stan, degree)
+        run = model(func)
+        given_pred = normalize(run, y_test_data)
+        print(given_pred)
 
 def file_manipulation():
     global urls, file_names
     for i in range(len(file_names)):
-        # download_files(urls[i], file_names[i])
-        # change_file_data(file_name=file_names[i])
+        download_files(urls[i], file_names[i])
+        change_file_data(file_name=file_names[i])
         graph(file_name=file_names[i])
         instantiate_model(file_names[i])
 

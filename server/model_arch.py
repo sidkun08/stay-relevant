@@ -14,8 +14,18 @@ def transformToTensor(data):
     useData = torch.tensor(data, dtype=torch.float32).unsqueeze(1)
     useDataMean = useData.mean()
     useDataStd = useData.std()
+    print(useDataMean)
+    print(useDataStd)
     useData = (useData - useDataMean)/useDataStd
     return useData
+
+def getMean(data):
+    tensor = torch.tensor(data, dtype=torch.float32).unsqueeze(1)
+    return tensor.mean()
+
+def getStd(data):
+    tensor = torch.tensor(data, dtype=torch.float32).unsqueeze(1)
+    return tensor.std()
 
 def normalize(pred, data):
     data = torch.tensor(data, dtype=torch.float32).unsqueeze(1)
