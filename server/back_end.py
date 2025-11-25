@@ -13,9 +13,8 @@ urls = ['https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart
         'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=PCE&scale=left&cosd=1959-01-01&coed=2025-05-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1959-01-01',
         'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=PPIACO&scale=left&cosd=1913-01-01&coed=2025-05-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1913-01-01',
         'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=GDP&scale=left&cosd=1947-01-01&coed=2025-01-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Quarterly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1947-01-01',
-        'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=UNRATE&scale=left&cosd=1948-01-01&coed=2025-06-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1948-01-01',
-        'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=FPCPITOTLZGUSA&scale=left&cosd=1960-01-01&coed=2024-01-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Annual&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1960-01-01']
-file_names = ['stay-relevant/data/cpi_total_monthly.csv', 'stay-relevant/data/pce_total_monthly.csv', 'stay-relevant/data/ppi_total_monthly.csv', 'stay-relevant/data/gdp_total_quarterly.csv', 'stay-relevant/data/unemployement_rate_monthly.csv', 'stay-relevant/data/inflation_rate_annually.csv']
+        'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=PINCOME&scale=left&cosd=1947-01-01&coed=2025-04-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Quarterly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-11-25&revision_date=2025-11-25&nd=1947-01-01']
+file_names = ['stay-relevant/data/cpi_total_monthly.csv', 'stay-relevant/data/pce_total_monthly.csv', 'stay-relevant/data/ppi_total_monthly.csv', 'stay-relevant/data/gdp_total_quarterly.csv', 'stay-relevant/data/income_total_quarterly.csv']
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -232,6 +231,7 @@ def instantiate_model(file_name):
         tensorVal = tensorVal.item()
         getAccurate.append(tensorVal)
         print(tensorVal)
+    
     with torch.no_grad():
         input = 2026
         data = [input]
@@ -242,12 +242,23 @@ def instantiate_model(file_name):
         func = polynomial_func(stan, degree)
         run = model(func)
         given_pred = normalize(run, y_test_data)
-        print(given_pred)
+    
     for i in range(len(given_pred)):
         myVal = given_pred[i]
         myVal = myVal.item()
     
     main_dict = {file_name: [{input: myVal}]}
+    with open('stay-relevant/data/predicted_data.json') as file:
+        file_read = json.load(file)
+    for entry in file_read:
+        for name in entry:
+            if file_name in name:
+                file_read.remove(entry)
+    
+    with open('stay-relevant/data/predicted_data.json', 'w') as file:
+        json.dump(file_read, file)
+
+    file.close()
 
     with open('stay-relevant/data/predicted_data.json') as file:
         loaded = json.load(file)
@@ -257,6 +268,7 @@ def instantiate_model(file_name):
     with open('stay-relevant/data/predicted_data.json', 'w') as file:
         json.dump(loaded, file, indent=4, separators=(", ", ": "))
 
+    file.close()
 def file_manipulation():
     global urls, file_names
     for i in range(len(file_names)):
