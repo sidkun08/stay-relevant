@@ -1,36 +1,22 @@
+Welcome to StayRelevant, a project that helps individuals observe predictions of the economic stnading of the United States. The program uses a Linear Regression Line, which uses data provided by the Federal Reserve, in order to make these predictions.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+I do not currently have a front end, so in order to run this program, you will need to:
 
-First, run the development server:
+First, pull the project into your Visual Studio Code IDE:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Then, ensure that your directory is in the StayRelevant directory, not to be confused with the stay-relevant directory:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+-- navigate to the "back_end.py" file located in the folder named: "server".
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+-- find line 238 in the file, which should have a variable labeled "user_input".
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   --- By changing the value of the variable, you would be able to run the linear regression model to predict the outputs for: GDP, CPI, PPI, PCE, INCOME, and Inflation:
 
-## Learn More
+-- After changing the value or leaving it alone, just press the run button and watch everything unfold!
+   
+   --- The final output will indicate whether or not the economy is in a bad state in the given year, based on the growth of each section.
+   --- The program will also output the training epochs to show the cost as it iterates through each epoch.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+--- Happy Coding and Thanks for Reading! 
