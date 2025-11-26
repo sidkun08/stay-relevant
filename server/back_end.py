@@ -1,13 +1,14 @@
 import requests
 import pandas as pd
 import matplotlib.pyplot as plota
-import math
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import numpy
 from model_arch import PolyRegress, transformToTensor, polynomial_func, normalize, getMean, getStd
 import json
+from flask import Flask
+
+app = Flask(__name__)
 
 urls = ['https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=CPIAUCSL&scale=left&cosd=1947-01-01&coed=2025-06-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1947-01-01',
         'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=PCE&scale=left&cosd=1959-01-01&coed=2025-05-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1959-01-01',
@@ -142,6 +143,7 @@ def graph(file_name):
     plota.show()
     
 def instantiate_model(file_name):
+    global user_input
     df = pd.read_csv(file_name, header=0)
     x_train_data = []
     x_test_data = []
@@ -197,7 +199,7 @@ def instantiate_model(file_name):
 
     model = PolyRegress(degree)
     cost = nn.MSELoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
 
     epochs = 20000
     for epoch in range(epochs):
@@ -233,8 +235,8 @@ def instantiate_model(file_name):
         print(tensorVal)
     
     with torch.no_grad():
-        input = 2026
-        data = [input]
+        user_input = 2026
+        data = [user_input]
         custom_tensor = torch.tensor(data, dtype=torch.float32).unsqueeze(1)
         _mean = getMean(x_test_data)
         _std = getStd(x_test_data)
@@ -247,7 +249,7 @@ def instantiate_model(file_name):
         myVal = given_pred[i]
         myVal = myVal.item()
     
-    main_dict = {file_name: [{input: myVal}]}
+    main_dict = {file_name: [{user_input: myVal}]}
     with open('stay-relevant/data/predicted_data.json') as file:
         file_read = json.load(file)
     for entry in file_read:
@@ -257,7 +259,6 @@ def instantiate_model(file_name):
     
     with open('stay-relevant/data/predicted_data.json', 'w') as file:
         json.dump(file_read, file)
-
     file.close()
 
     with open('stay-relevant/data/predicted_data.json') as file:
@@ -267,9 +268,138 @@ def instantiate_model(file_name):
 
     with open('stay-relevant/data/predicted_data.json', 'w') as file:
         json.dump(loaded, file, indent=4, separators=(", ", ": "))
-
     file.close()
+                
+
+@app.route('/')
 def file_manipulation():
+    global urls, file_names
+    for i in range(len(file_names)):
+        download_files(urls[i], file_names[i])
+        change_file_data(file_name=file_names[i])
+
+@app.route('/run')
+def run_model():
+    for i in range(len(file_names)):
+        instantiate_model(file_names[i])
+
+@app.route('/conclude')
+def compare(JSONFile):
+    global user_input
+    vals = []
+    max_val = []
+    predicted_va = []
+    isIncreasing = False
+    for idx in range(len(file_names)):
+        vals.clear()
+        true_file = file_names[idx]
+        df = pd.read_csv(true_file, header=0)
+        for i in df['VALUES']:
+            vals.append(i)
+        max_val.append(max(vals))
+        with open(JSONFile) as file:
+            load = json.load(file)
+        for entry in load:
+            for name in entry:
+                names = entry.get(name)
+                for num in names:
+                    y = num.values()
+                    for val in y:
+                        the_val = val
+                        predicted_va.append(val)
+    isIncreasing = []
+    isDecreasing = []
+    for i in range(len(file_names)):
+        target = predicted_va[i]
+        maximum = max_val[i]
+        if 'cpi' in file_names[i]:
+            inflation = (((target - maximum) / (maximum))*100)
+        difference = (((target-maximum) / (maximum)) * 100)
+        if difference > 0:
+            dictDifference = {file_names[i]: difference}
+            isIncreasing.append(dictDifference)
+        else:
+            dictDifference = {file_names[i]: difference}
+            isDecreasing.append(dictDifference)
+    inflationCount = {'inflationForPredicted': f"{inflation}%"}
+    with open('stay-relevant/data/conclusions.json') as file:
+        loaded = json.load(file)
+    for entry in loaded:
+        for i in entry:
+            key = i.keys()
+            for name in key:
+                if name in file_names:
+                    loaded.clear()
+    with open('stay-relevant/data/conclusions.json', 'w') as file:
+        json.dump(loaded, file, indent=4)
+    file.close()
+
+    with open('stay-relevant/data/conclusions.json') as file:
+        listOfConclusion = json.load(file)
+    
+    listOfConclusion.append(isIncreasing)
+    listOfConclusion.append(isDecreasing)
+
+    with open('stay-relevant/data/conclusions.json', 'w') as file:
+        send = json.dump(listOfConclusion, file, indent=4, separators=(', ', ': '))
+    
+    file.close()
+
+    with open('stay-relevant/data/conclusions.json') as jfile:
+        everything = json.load(jfile)            
+
+    statements = []
+    EconIsIncreasing = 0
+    finalStatement = ""
+    print(isIncreasing)
+    for i in isIncreasing:
+        name = [name for name in i]
+        name = name[0].split('/')[2].split('_')[0]
+        name = name.upper()
+
+        value = [val for val in i.values()]
+        value = value[0]
+        if value > 0:
+            statement = f'The {name} has increased by {round(value, 2)}%. This signifies a positive increase to the economy.\n'
+            statements.append(statement)
+            EconIsIncreasing += 1
+        elif value < 0:
+            statement = f'The {name} has decreased by {round(value, 2)}%. This signifies a negative decrease to the economy.\n'
+            statements.append(statement)
+            EconIsIncreasing -= 1
+        else:
+            statement = f'The {name} has increased by {round(value, 2)}%. This signifies a positive increase to the economy.\n'
+            statements.append(statement)
+            EconIsIncreasing += 1
+
+    if inflation > 0:
+        statement = f'The inflation has increased by {round(inflation, 2)}%. This signifies a negative decrease to the economy.\n'
+        statements.append(statement)
+        EconIsIncreasing -= 1
+    elif inflation < 0:
+        statement = f'The inflation has decreased by {round(inflation, 2)}%. This signifies a positive increase to the economy.\n'
+        statements.append(statement)
+        EconIsIncreasing += 1
+    else:
+        statement = f'The inflation has increased by {round(inflation, 2)}%. This signifies a positive increase to the economy.\n'
+        statements.append(statement)
+        EconIsIncreasing += 1
+    
+    if EconIsIncreasing > 0:
+        concludingStatement = 'In Conclusion, the economy is in a good place in the provided year.'
+        statements.append(concludingStatement)
+    elif EconIsIncreasing < 0:
+        concludingStatement = 'In Conclusion, the economy is not in a good place in the provided year.'
+        statements.append(concludingStatement)
+    else:
+        concludingStatement = 'In Conclusion, the economy is in a good place in the provided year.'
+        statements.append(concludingStatement)
+
+    for i in range(len(statements)):
+        finalStatement += statements[i]
+    print(finalStatement)
+
+def file_manipulation():    
     global urls, file_names
     for i in range(len(file_names)):
         download_files(urls[i], file_names[i])
@@ -277,5 +407,4 @@ def file_manipulation():
         graph(file_name=file_names[i])
         instantiate_model(file_names[i])
 
-file_manipulation()
-
+compare('stay-relevant/data/predicted_data.json')
