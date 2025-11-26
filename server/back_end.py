@@ -351,7 +351,6 @@ def compare(JSONFile):
     statements = []
     EconIsIncreasing = 0
     finalStatement = ""
-    print(isIncreasing)
     for i in isIncreasing:
         name = [name for name in i]
         name = name[0].split('/')[2].split('_')[0]
@@ -399,12 +398,6 @@ def compare(JSONFile):
         finalStatement += statements[i]
     print(finalStatement)
 
-def file_manipulation():    
-    global urls, file_names
-    for i in range(len(file_names)):
-        download_files(urls[i], file_names[i])
-        change_file_data(file_name=file_names[i])
-        graph(file_name=file_names[i])
-        instantiate_model(file_names[i])
-
+file_manipulation()
+run_model()
 compare('stay-relevant/data/predicted_data.json')
