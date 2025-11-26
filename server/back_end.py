@@ -15,7 +15,7 @@ urls = ['https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart
         'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=PPIACO&scale=left&cosd=1913-01-01&coed=2025-05-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1913-01-01',
         'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=GDP&scale=left&cosd=1947-01-01&coed=2025-01-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Quarterly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-07-15&revision_date=2025-07-15&nd=1947-01-01',
         'https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=PINCOME&scale=left&cosd=1947-01-01&coed=2025-04-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Quarterly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-11-25&revision_date=2025-11-25&nd=1947-01-01']
-file_names = ['stay-relevant/data/cpi_total_monthly.csv', 'stay-relevant/data/pce_total_monthly.csv', 'stay-relevant/data/ppi_total_monthly.csv', 'stay-relevant/data/gdp_total_quarterly.csv', 'stay-relevant/data/income_total_quarterly.csv']
+file_names = ['data/cpi_total_monthly.csv', 'data/pce_total_monthly.csv', 'data/ppi_total_monthly.csv', 'data/gdp_total_quarterly.csv', 'data/income_total_quarterly.csv']
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -250,23 +250,23 @@ def instantiate_model(file_name):
         myVal = myVal.item()
     
     main_dict = {file_name: [{user_input: myVal}]}
-    with open('stay-relevant/data/predicted_data.json') as file:
+    with open('data/predicted_data.json') as file:
         file_read = json.load(file)
     for entry in file_read:
         for name in entry:
             if file_name in name:
                 file_read.remove(entry)
     
-    with open('stay-relevant/data/predicted_data.json', 'w') as file:
+    with open('data/predicted_data.json', 'w') as file:
         json.dump(file_read, file)
     file.close()
 
-    with open('stay-relevant/data/predicted_data.json') as file:
+    with open('data/predicted_data.json') as file:
         loaded = json.load(file)
     
     loaded.append(main_dict)
 
-    with open('stay-relevant/data/predicted_data.json', 'w') as file:
+    with open('data/predicted_data.json', 'w') as file:
         json.dump(loaded, file, indent=4, separators=(", ", ": "))
     file.close()
                 
@@ -322,7 +322,7 @@ def compare(JSONFile):
             dictDifference = {file_names[i]: difference}
             isDecreasing.append(dictDifference)
     inflationCount = {'inflationForPredicted': f"{inflation}%"}
-    with open('stay-relevant/data/conclusions.json') as file:
+    with open('data/conclusions.json') as file:
         loaded = json.load(file)
     for entry in loaded:
         for i in entry:
@@ -330,22 +330,22 @@ def compare(JSONFile):
             for name in key:
                 if name in file_names:
                     loaded.clear()
-    with open('stay-relevant/data/conclusions.json', 'w') as file:
+    with open('data/conclusions.json', 'w') as file:
         json.dump(loaded, file, indent=4)
     file.close()
 
-    with open('stay-relevant/data/conclusions.json') as file:
+    with open('data/conclusions.json') as file:
         listOfConclusion = json.load(file)
     
     listOfConclusion.append(isIncreasing)
     listOfConclusion.append(isDecreasing)
 
-    with open('stay-relevant/data/conclusions.json', 'w') as file:
+    with open('data/conclusions.json', 'w') as file:
         send = json.dump(listOfConclusion, file, indent=4, separators=(', ', ': '))
     
     file.close()
 
-    with open('stay-relevant/data/conclusions.json') as jfile:
+    with open('data/conclusions.json') as jfile:
         everything = json.load(jfile)            
 
     statements = []
@@ -353,7 +353,7 @@ def compare(JSONFile):
     finalStatement = ""
     for i in isIncreasing:
         name = [name for name in i]
-        name = name[0].split('/')[2].split('_')[0]
+        name = name[0].split('/')[1].split('_')[0]
         name = name.upper()
 
         value = [val for val in i.values()]
@@ -400,4 +400,4 @@ def compare(JSONFile):
 
 file_manipulation()
 run_model()
-compare('stay-relevant/data/predicted_data.json')
+compare('data/predicted_data.json')
