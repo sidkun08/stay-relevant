@@ -1,0 +1,168 @@
+/* Reset & base */
+/* Import Inter font (matches Anima's font style) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+body {
+  margin: 0;
+  font-family: "Inter", Arial, sans-serif; /* Updated to Inter */
+  background-color: #f9fafb;
+  color: #1e293b;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background-color: #f9fafb;
+  color: #1e293b;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* HERO section (full width) */
+.hero {
+  width: 100%;
+  background: #0a1f44;  /* dark navy-blue-ish for contrast */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 20px;
+}
+
+.hero-content {
+  max-width: 800px;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 0.6em;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  line-height: 1.5;
+  margin-bottom: 2em;
+  opacity: 0.85;
+}
+
+/* Input + Button Card */
+.input-card {
+  background: rgb(0, 0, 0);
+  padding: 24px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.user-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.user-input:focus {
+  border-color: #4a7bd8;
+}
+
+.generate-btn {
+  padding: 12px 0;
+  background-color: #4a7bd8;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.generate-btn:hover {
+  background-color: #3b66b3;
+  transform: scale(1.02);
+}
+
+/* Mission / Info Section */
+.mission-section {
+  flex: 1;
+  padding: 60px 20px;
+  background-color: #f9fafb;
+}
+
+.mission-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.mission-container h2 {
+  font-size: 1.6rem;
+  color: #0f1f47;
+}
+
+.mission-box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  color: #334155;
+}
+
+.mission-box p {
+  line-height: 1.5;
+}
+
+/* Full border around the entire website */
+.app-container {
+  border: 3px solid #4a7bd8;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Footer styling */
+.footer-section {
+  background-color: #f3f4f6;
+  padding: 40px 20px;
+  color: #1e293b;
+  text-align: center;
+}
+
+.footer-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.footer-container h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.footer-container p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #334155;
+}
