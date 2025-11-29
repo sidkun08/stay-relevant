@@ -19,7 +19,7 @@ file_names = ['data/cpi_total_monthly.csv', 'data/pce_total_monthly.csv', 'data/
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-
+num=0
 def download_files(file_url, file_path):
     downloading = requests.get(url=file_url)
     if downloading.status_code == 200:
@@ -143,7 +143,7 @@ def graph(file_name):
     plota.show()
     
 def instantiate_model(file_name):
-    global user_input, model, x_test, y_test, x_test_data, y_test_data, cost, degree, getAccurate
+    global user_input, model, x_test, y_test, x_test_data, y_test_data, cost, degree, getAccurate, num
     df = pd.read_csv(file_name, header=0)
     x_train_data = []
     x_test_data = []
@@ -220,17 +220,18 @@ def instantiate_model(file_name):
         tensorVal = tensorVal.item()
         print(tensorVal)
     
-    model_save_path = "model.pth"
+    model_save_path = f"model{num}.pth"
     torch.save(model.state_dict(), model_save_path)
+    num += 1
     return model_save_path
 
 
-def runModel(file_name):
+def runModel(path_name, file_name):
     degree = 5
     model = PolyRegress(degree)
     cost = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=0.01)
-    model.load_state_dict(torch.load("model.pth"))
+    model.load_state_dict(torch.load(path_name))
     model.eval()
     with torch.no_grad():
         X_Test_Func = polynomial_func(x_test, degree)
@@ -291,9 +292,10 @@ def file_manipulation():
 
 @app.route('/run')
 def run_model():
+    num = 0
     for i in range(len(file_names)):
-        instantiate_model(file_names[i])
-        runModel(file_names[i])
+        runModel(f"model{num}.pth", file_names[i])
+        num +=1
 
 @app.route('/conclude')
 def compare(JSONFile):
