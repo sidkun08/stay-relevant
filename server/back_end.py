@@ -143,7 +143,7 @@ def graph(file_name):
     plota.show()
     
 def instantiate_model(file_name):
-    global user_input
+    global user_input, model, x_test, y_test, x_test_data, y_test_data, cost, degree, getAccurate
     df = pd.read_csv(file_name, header=0)
     x_train_data = []
     x_test_data = []
@@ -220,6 +220,17 @@ def instantiate_model(file_name):
         tensorVal = tensorVal.item()
         print(tensorVal)
     
+    model_save_path = "model.pth"
+    torch.save(model.state_dict(), model_save_path)
+    return model_save_path
+
+
+def runModel(file_name):
+    degree = 5
+    model = PolyRegress(degree)
+    cost = nn.MSELoss()
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
+    model.load_state_dict(torch.load("model.pth"))
     model.eval()
     with torch.no_grad():
         X_Test_Func = polynomial_func(x_test, degree)
@@ -233,7 +244,7 @@ def instantiate_model(file_name):
         tensorVal = tensorVal.item()
         getAccurate.append(tensorVal)
         print(tensorVal)
-    
+
     with torch.no_grad():
         user_input = 2026
         data = [user_input]
@@ -244,11 +255,11 @@ def instantiate_model(file_name):
         func = polynomial_func(stan, degree)
         run = model(func)
         given_pred = normalize(run, y_test_data)
-    
+
     for i in range(len(given_pred)):
         myVal = given_pred[i]
         myVal = myVal.item()
-    
+
     main_dict = {file_name: [{user_input: myVal}]}
     with open('data/predicted_data.json') as file:
         file_read = json.load(file)
@@ -256,20 +267,20 @@ def instantiate_model(file_name):
         for name in entry:
             if file_name in name:
                 file_read.remove(entry)
-    
+
     with open('data/predicted_data.json', 'w') as file:
         json.dump(file_read, file)
     file.close()
 
     with open('data/predicted_data.json') as file:
         loaded = json.load(file)
-    
+
     loaded.append(main_dict)
 
     with open('data/predicted_data.json', 'w') as file:
         json.dump(loaded, file, indent=4, separators=(", ", ": "))
     file.close()
-                
+            
 
 @app.route('/')
 def file_manipulation():
@@ -282,6 +293,7 @@ def file_manipulation():
 def run_model():
     for i in range(len(file_names)):
         instantiate_model(file_names[i])
+        runModel(file_names[i])
 
 @app.route('/conclude')
 def compare(JSONFile):
